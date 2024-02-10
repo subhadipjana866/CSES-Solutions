@@ -1,92 +1,162 @@
-import java.io.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class ConcertTickets {
-    public static int findClosest(ArrayList<Integer> arr, int target) {
-        int n = arr.size();
-        // System.out.println(n);
-        if (n>0 && target < arr.get(0)) {
-            return -1;
+    static class Reader { 
+        final private int BUFFER_SIZE = 1 << 16; 
+        private DataInputStream din; 
+        private byte[] buffer; 
+        private int bufferPointer, bytesRead; 
+  
+        public Reader() 
+        { 
+            din = new DataInputStream(System.in); 
+            buffer = new byte[BUFFER_SIZE]; 
+            bufferPointer = bytesRead = 0; 
         } 
-        if (n>0 && target > arr.get(n - 1)) {
-            return arr.get(n - 1);
-        }
-        if(n == 1 && target <= arr.get(0)){
-            return arr.get(0);
-        }
-        if (n==0) {
-            return -1;
-        }
-        
-
-        int i = 0, j = n, mid = 0;
-
-        while (i<j) {
-            if (arr.get(i+1) > target) {
-                return arr.get(i);
-            }else if (arr.get(i+1) == target) {
-                return arr.get(i+1);
-            }
-            i++;
-        }
-        // while (i < j) {
-        //     mid = (i + j) / 2;
-        //     if (arr.get(mid) == target) {
-        //         return arr.get(mid);
-        //     }
-        //     if (target < arr.get(mid)) {
-        //         if (mid > 0 && target > arr.get(mid - 1)) {
-        //             return getClosest(arr.get(mid - 1), arr.get(mid), target);
-
-        //         }
-        //         j = mid;
-        //     } else {
-        //         if (mid < n - 1 && target < arr.get(mid + 1)) {
-        //             return getClosest(arr.get(mid), arr.get(mid + 1), target);
-        //         }
-        //         i = mid + 1;
-        //     }
-        // }
-        return -1;
+  
+        public Reader(String file_name) throws IOException 
+        { 
+            din = new DataInputStream( 
+                new FileInputStream(file_name)); 
+            buffer = new byte[BUFFER_SIZE]; 
+            bufferPointer = bytesRead = 0; 
+        } 
+  
+        public String readLine() throws IOException 
+        { 
+            byte[] buf = new byte[64]; // line length 
+            int cnt = 0, c; 
+            while ((c = read()) != -1) { 
+                if (c == '\n') { 
+                    if (cnt != 0) { 
+                        break; 
+                    } 
+                    else { 
+                        continue; 
+                    } 
+                } 
+                buf[cnt++] = (byte)c; 
+            } 
+            return new String(buf, 0, cnt); 
+        } 
+  
+        public int nextInt() throws IOException 
+        { 
+            int ret = 0; 
+            byte c = read(); 
+            while (c <= ' ') { 
+                c = read(); 
+            } 
+            boolean neg = (c == '-'); 
+            if (neg) 
+                c = read(); 
+            do { 
+                ret = ret * 10 + c - '0'; 
+            } while ((c = read()) >= '0' && c <= '9'); 
+  
+            if (neg) 
+                return -ret; 
+            return ret; 
+        } 
+  
+        public long nextLong() throws IOException 
+        { 
+            long ret = 0; 
+            byte c = read(); 
+            while (c <= ' ') 
+                c = read(); 
+            boolean neg = (c == '-'); 
+            if (neg) 
+                c = read(); 
+            do { 
+                ret = ret * 10 + c - '0'; 
+            } while ((c = read()) >= '0' && c <= '9'); 
+            if (neg) 
+                return -ret; 
+            return ret; 
+        } 
+  
+        public double nextDouble() throws IOException 
+        { 
+            double ret = 0, div = 1; 
+            byte c = read(); 
+            while (c <= ' ') 
+                c = read(); 
+            boolean neg = (c == '-'); 
+            if (neg) 
+                c = read(); 
+  
+            do { 
+                ret = ret * 10 + c - '0'; 
+            } while ((c = read()) >= '0' && c <= '9'); 
+  
+            if (c == '.') { 
+                while ((c = read()) >= '0' && c <= '9') { 
+                    ret += (c - '0') / (div *= 10); 
+                } 
+            } 
+  
+            if (neg) 
+                return -ret; 
+            return ret; 
+        } 
+  
+        private void fillBuffer() throws IOException 
+        { 
+            bytesRead = din.read(buffer, bufferPointer = 0, 
+                                 BUFFER_SIZE); 
+            if (bytesRead == -1) 
+                buffer[0] = -1; 
+        } 
+  
+        private byte read() throws IOException 
+        { 
+            if (bufferPointer == bytesRead) 
+                fillBuffer(); 
+            return buffer[bufferPointer++]; 
+        } 
+  
+        public void close() throws IOException 
+        { 
+            if (din == null) 
+                return; 
+            din.close(); 
+        } 
     }
-
-    public static int getClosest(int val1, int val2, int target) {
-        if (target - val1 >= val2 - target) {
-            return val2;
-        } else {
-            return val1;
-        }
-    }
-
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        Reader br = new Reader();
 
-        // Read the input
-        int[] n = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-        int[] tickets = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-        int[] customers = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        int n = br.nextInt();
+        int m = br.nextInt();
+        TreeMap<Integer, Integer> concert_map= new TreeMap<>();
+        StringBuffer res = new StringBuffer();
+        Integer temp;
+        Map.Entry<Integer, Integer> val;
 
-        // Sort the tickets
-        Arrays.sort(tickets);
-
-        ArrayList<Integer> myList = Arrays.stream(tickets).boxed().collect(Collectors.toCollection(ArrayList::new));
-
-        for (int i = 0; i < n[1]; i++) {
-
-            
-            int ans = findClosest(myList, customers[i]);
-            // System.out.println(ans);
-            bw.write(ans+"\n");
-            if (ans != -1) {
-                myList.remove(myList.indexOf(ans));
-            }
-            
-
+        for (int i = 0; i < n; i++) {
+            temp = br.nextInt();
+            if (concert_map.containsKey(temp))
+                concert_map.put(temp,concert_map.get(temp)+1);
+            else concert_map.put(temp,1);
+        }
+        for (int i = 0; i < m; i++) {
+            temp = br.nextInt();
+            val=concert_map.lowerEntry(temp+1);
+            // System.out.println(val);
+            if (val!=null){
+                res.append(val.getKey()).append('\n');
+                if (val.getValue() == 1)
+                    concert_map.remove(val.getKey());
+                else
+                    concert_map.put(val.getKey(),val.getValue()-1);
+            }else
+                res.append("-1\n");
         }
 
-        bw.flush();
-
+        System.out.println(res);
     }
 }
