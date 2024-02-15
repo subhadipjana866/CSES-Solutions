@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-public class RestaurantCustomers {
+public class MovieFestival {
     static class Reader {
         final private int BUFFER_SIZE = 1 << 16;
         private DataInputStream din;
@@ -118,7 +118,7 @@ public class RestaurantCustomers {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException{
         Reader br = new Reader();
         int n = br.nextInt();
         TreeMap<Integer, Integer> customer_map = new TreeMap<>();
@@ -126,32 +126,51 @@ public class RestaurantCustomers {
         for (int i = 0; i < n; i++) {
             temp1 = br.nextInt();
             temp2 = br.nextInt();
-            if (customer_map.containsKey(temp1) && customer_map.containsKey(temp2)) {
-                customer_map.put(temp1, customer_map.get(temp1) + 1);
-                customer_map.put(temp2, customer_map.get(temp2) - 1);
-            } else if (customer_map.containsKey(temp1) && !customer_map.containsKey(temp2)) {
-                customer_map.put(temp1, customer_map.get(temp1) + 1);
-                customer_map.put(temp2, -1);
-            } else if (!customer_map.containsKey(temp1) && customer_map.containsKey(temp2)) {
-                customer_map.put(temp1, 1);
-                customer_map.put(temp2, customer_map.get(temp2) - 1);
+            // if (customer_map.containsKey(temp1) && customer_map.containsKey(temp2)) {
+            //     customer_map.put(temp1, customer_map.get(temp1) + 1);
+            //     customer_map.put(temp2, customer_map.get(temp2) - 1);
+            // } else if (customer_map.containsKey(temp1) && !customer_map.containsKey(temp2)) {
+            //     customer_map.put(temp1, customer_map.get(temp1) + 1);
+            //     customer_map.put(temp2, -1);
+            // } else if (!customer_map.containsKey(temp1) && customer_map.containsKey(temp2)) {
+            //     customer_map.put(temp1, 1);
+            //     customer_map.put(temp2, customer_map.get(temp2) - 1);
+                
+            // } else {
+            //     customer_map.put(temp1, 1);
+            //     customer_map.put(temp2, -1);
+            // }
+            if (customer_map.containsKey(temp2)) {
+                if (Math.abs(customer_map.get(temp2)-temp2) > Math.abs(temp1-temp2) ) {
+                    customer_map.put(temp2, temp1);
+                }
                 
             } else {
-                customer_map.put(temp1, 1);
-                customer_map.put(temp2, -1);
+                customer_map.put(temp2, temp1);
+                
             }
-
+            
         }
-        Integer maxValue = 0;
-        Integer sum = 0;
+        Integer count = 0;
+        Integer curr = 0;
         for (Entry<Integer, Integer> entry : customer_map.entrySet()) {
+            Integer key = entry.getKey();
             Integer value = entry.getValue();
-            sum += value;
-            if (sum > maxValue) {
-                maxValue = sum;
+            if (value >= curr) {
+                count++;
+                curr = key;
             }
+            // if ((value > 0) && !flag) {
+            //     flag = true;
+            // }else if (value <= 0 && flag) {
+            //     flag = false;
+            //     count++;
+            // }
+
+
+            
 
         }
-        System.out.println(maxValue);
+        System.out.println(count);
     }
 }
